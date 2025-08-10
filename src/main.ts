@@ -1,16 +1,23 @@
-import { generateText } from "ai";
-import { model } from "./_internal/setup";
+import { MedicalFormAgent } from "./agent/medicalFormAgent";
 import { createSession } from "./session";
 
 export async function main() {
-  // This will automatically create a chromium instance, connect, and navigate to the given url.
-  // You are given a playwright page back.
-  const page = await createSession("https://www.google.com");
+  console.log("Starting Medical Form Agent...");
+  
+  const page = await createSession("https://magical-medical-form.netlify.app/");
 
-  // We've given you an model (gemini-2.5-flash-preview-04-17), you can use the vercel AI SDK to generate text, setup tools, etc.
-  // Ensure you have set the GOOGLE_GENERATIVE_AI_API_KEY environment variable.
-  const response = await generateText({
-    model,
-    prompt: "How many r's are in strawberry?",
+  const agent = new MedicalFormAgent(page);
+  
+  console.log("Browser ready! Press Enter in terminal to run the agent...");
+
+  process.stdin.once('data', async () => {
+    try {
+      await agent.run();
+    } catch (error) {
+      console.error("Agent Failed:", error);
+    }
   });
+  
+  await new Promise(() => {});
 }
+

@@ -1,3 +1,16 @@
-import { google } from "@ai-sdk/google";
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
 
-export const model = google("gemini-2.5-flash-preview-04-17");
+dotenv.config();
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
+});
+
+export const generateContent = (contents: string) => {
+  return ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents
+  });
+};
+
