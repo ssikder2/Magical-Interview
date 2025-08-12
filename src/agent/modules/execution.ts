@@ -1,6 +1,6 @@
 import { Page } from "playwright";
 import { generateContent } from "../../_internal/setup";
-import { Action, ExecutionPlan, SubAction } from "../types";
+import { Action, SubAction } from "../types";
 
 export class ExecutionModule {
   constructor(private page: Page) {}
@@ -37,9 +37,9 @@ export class ExecutionModule {
     const end = responseText.lastIndexOf('}') + 1;
     const jsonText = responseText.substring(start, end);
     
-    const execution: ExecutionPlan = JSON.parse(jsonText);
+    const execution = JSON.parse(jsonText);
 
-    console.log("Execution plan:", execution.reason);
+    console.log(`Executing: ${execution.command} on ${execution.selector}`);
 
     switch (execution.command) {
       case 'click':

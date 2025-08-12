@@ -43,7 +43,6 @@ export class DecisionModule {
       const jsonText = responseText.substring(start, end);
       
       const action = JSON.parse(jsonText);
-      console.log("AI reasoning:", action.reason);
       return action;
     } catch (error) {
       if ((error as any).status === 429) {

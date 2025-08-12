@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node ./src/_internal/run.ts"
+    "dev": "ts-node ./src/server.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.14.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
@@ -18,7 +20,9 @@
     "@ai-sdk/google": "^1.2.19",
     "@google/genai": "^1.13.0",
     "ai": "^4.3.2",
+    "cors": "^2.8.5",
     "dotenv-defaults": "^5.0.2",
+    "express": "^5.1.0",
     "playwright": "^1.51.1"
   }
 }

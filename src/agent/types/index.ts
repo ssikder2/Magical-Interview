@@ -1,14 +1,5 @@
 export interface FormData {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  medicalId: string;
-  gender: string;
-  bloodType: string;
-  allergies: string;
-  currentMedications: string;
-  emergencyContact: string;
-  emergencyPhone: string;
+  [key: string]: string;
 }
 
 export interface Section {

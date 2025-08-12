@@ -15,7 +15,7 @@ export class MedicalFormAgent {
   private decision: DecisionModule;
   private execution: ExecutionModule;
 
-  constructor(page: Page) {
+  constructor(page: Page, formData?: FormData) {
     this.page = page;
     this.formData = MEDICAL_FORM_DATA;
     
@@ -29,15 +29,14 @@ export class MedicalFormAgent {
 
     while (true) {
       const currentState = await this.perception.perceive(this.completedSections, this.completedFields);
-      console.log("current state:", currentState);
 
       const action = await this.decision.decide(currentState, this.completedSections, this.completedFields);
-      console.log("Decided action:", action);
+      console.log(`Agent decided: ${action.type} - ${action.reason}`);
 
       await this.act(action);
 
       if (action.type === "COMPLETE") {
-        console.log("Form Completed");
+        console.log("Form completed successfully");
         break;
       }
     }
