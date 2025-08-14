@@ -2,6 +2,11 @@ import { Page } from "playwright";
 import { Action, ExecutionPlan, SubAction } from "../../../types";
 import { generateContent } from "../../../utils/ai";
 
+/**
+ * ExecutionModule handles the actual execution of actions on web forms.
+ * It converts high-level actions into specific Playwright commands using AI
+ * to determine the best way to interact with form elements.
+ */
 export class ExecutionModule {
   constructor(private page: Page) {}
 
@@ -24,9 +29,11 @@ export class ExecutionModule {
       }
     `;
 
+    // Get AI-generated execution plan
     const response = await generateContent(executionPrompt);
     const responseText = response.text || '';
     
+    // Extract JSON from AI response
     const start = responseText.indexOf('{');
     const end = responseText.lastIndexOf('}') + 1;
     const jsonText = responseText.substring(start, end);
@@ -35,6 +42,7 @@ export class ExecutionModule {
 
     console.log(`Executing: ${execution.command} on ${execution.selector}`);
 
+    // Execute the Playwright command based on AI decision
     switch (execution.command) {
       case 'click':
         await this.page.click(execution.selector);
@@ -54,6 +62,7 @@ export class ExecutionModule {
   async openSection(sectionName: string): Promise<void> {
     console.log(`Opening section: ${sectionName}`);
     
+    // Find and click the section button using text content
     const sectionButton = await this.page.locator('button').filter({ hasText: sectionName }).first();
     if (await sectionButton.isVisible()) {
       await sectionButton.click();

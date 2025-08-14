@@ -2,6 +2,8 @@ import { JobStatus } from '../../types';
 import { AgentService } from './AgentService';
 import { JobService } from './JobService';
 
+// Background service that continuously processes pending form-filling jobs
+// Automatically picks up new jobs and processes them using the AgentService
 export class JobProcessor {
   private isProcessing = false;
   private processingInterval: NodeJS.Timeout | null = null;
@@ -11,23 +13,23 @@ export class JobProcessor {
     private agentService: AgentService
   ) {}
 
-  // Start processing jobs in the background
+  // Starts the background job processing loop
   startProcessing(): void {
     if (this.isProcessing) return;
-
+    
     this.isProcessing = true;
     console.log('Job processor started');
-
+    
     // Process jobs every 2 seconds
     this.processingInterval = setInterval(() => {
       this.processNextJob();
     }, 2000);
   }
 
-  // Stop processing jobs
+  // Stops the background job processing loop
   stopProcessing(): void {
     if (!this.isProcessing) return;
-
+    
     this.isProcessing = false;
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
@@ -36,7 +38,7 @@ export class JobProcessor {
     console.log('Job processor stopped');
   }
 
-  // Process next pending job
+  // Processes the next pending job in the queue
   private async processNextJob(): Promise<void> {
     const jobs = this.jobService.getAllJobs();
     const pendingJob = jobs.find(job => job.status === JobStatus.PENDING);

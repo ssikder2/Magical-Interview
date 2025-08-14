@@ -1,10 +1,25 @@
 import { Action, FormData, PageState } from "../../../types";
 import { generateContent } from "../../../utils/ai";
 
+/**
+ * DecisionModule handles the AI-powered decision making for form filling strategy.
+ * It determines whether to fill fields, open sections, or submit the form based on
+ * the current state and available data.
+ */
 export class DecisionModule {
   constructor(private formData: FormData) {}
 
+  // AI-powered decision making for form filling strategy
   async decide(currentState: PageState, completedSections: Set<string>, completedFields: Set<string>): Promise<Action> {
+    // Check if form has already been submitted to avoid unnecessary processing
+    if (currentState.formCompleted) {
+      return {
+        type: 'COMPLETE',
+        reason: 'Form has already been submitted successfully'
+      };
+    }
+
+    // Fill any visible fields that have available data and haven't been completed yet
     if (currentState.visibleFields.length > 0) {
       const fieldsToFill = currentState.visibleFields.filter(field => 
         !completedFields.has(field.name) && 
@@ -25,69 +40,47 @@ export class DecisionModule {
     }
 
     const prompt = `
-      CRITICAL: Return ONLY raw JSON, no formatting, no markdown, no code blocks.
-      The response must start with { and end with }.
+      Return ONLY raw JSON: {"type": "OPEN_SECTION|SUBMIT", "target": "section_name", "reason": "why"}
 
-      You are an intelligent AI agent that can analyze ANY web form and create optimal filling strategies.
-      
-      CURRENT FORM ANALYSIS:
-      - Form structure: ${JSON.stringify(currentState.sections)}
-      - Visible fields: ${JSON.stringify(currentState.visibleFields)}
-      - Completed sections: ${JSON.stringify(Array.from(completedSections))}
-      - Completed fields: ${JSON.stringify(Array.from(completedFields))}
-      - Form data available: ${JSON.stringify(this.formData)}
+      You are an AI agent filling out a web form. Analyze the current state and decide the next action.
+
+      CURRENT STATE:
+      - Visible fields: ${currentState.visibleFields.map(f => f.name).join(', ')}
+      - Completed fields: ${Array.from(completedFields).join(', ')}
+      - Available form data: ${Object.keys(this.formData).join(', ')}
+
+      FORM STRUCTURE:
+      - Sections: ${currentState.sections.length > 0 ? currentState.sections.map(s => `${s.name} (${s.isOpen ? 'open' : 'closed'})`).join(', ') : 'Single page form - no sections'}
+      - Completed sections: ${currentState.sections.length > 0 ? Array.from(completedSections).join(', ') : 'N/A'}
       - Form completion status: ${currentState.formCompleted}
-      
-      YOUR TASK: Analyze this form and decide the optimal next action.
-      
-      FORM STRUCTURE DETECTION:
-      First, determine what type of form this is:
-      - SINGLE PAGE: All fields visible at once (contact forms, simple surveys)
-      - SECTIONS: Form with collapsible/expandable sections (medical forms, job apps)
-      - TABS: Form with tabbed content areas
-      - WIZARD: Multi-step form with Next/Previous navigation
-      
-      ADAPTIVE STRATEGY:
-      Based on the form type, use the appropriate approach:
-      
-      SINGLE PAGE FORMS:
-      - Fill all visible fields that have data
-      - Submit when all fields are completed
-      
-      SECTION/TAB FORMS:
-      - Fill all visible fields in current section
-      - Open next section/tab with unfilled fields
-      - Repeat until all sections are processed
-      - Submit when all sections are complete
-      
-      WIZARD FORMS:
-      - Fill all visible fields on current step
-      - Navigate to next step if fields are complete
-      - Submit on final step
-      
-      CRITICAL INSTRUCTIONS:
-      1. You must FILL OUT all visible fields before moving to next section/step
-      2. Having data in formData does NOT mean fields are filled - execute the fill actions
-      3. Adapt your strategy based on the detected form structure
-      4. Only submit when you have actually filled all required fields
-      
-      POSSIBLE ACTIONS:
-      - OPEN_SECTION: Open a section/tab/step that contains unfilled fields
-      - SUBMIT: Submit the form if all required fields are actually filled and visible
-      - COMPLETE: Mark as complete if form is already submitted
-      
-      Return your intelligent decision as JSON:
-      {
-        "type": "OPEN_SECTION|SUBMIT|COMPLETE",
-        "target": "section_name_if_opening_section",
-        "reason": "Your intelligent analysis including: 1) What type of form this is, 2) Why this is the optimal next action, 3) Your strategy for this form type"
-      }
+
+      DECISION LOGIC:
+      IF THIS IS A SINGLE PAGE FORM (no sections):
+      - If all visible fields are completed → SUBMIT
+      - If some fields are unfilled → Wait for more fields to become visible
+
+      IF THIS IS A SECTIONED FORM (has sections):
+      - A section is COMPLETE when ALL its fields with available data are in completedFields
+      - NEVER reopen a section that is in completedSections
+      - Only open sections that are NOT in completedSections
+      - If all sections are completed → SUBMIT
+
+      CRITICAL RULES:
+      1. Check form type first (single page vs sectioned)
+      2. For single page forms: submit when all fields done
+      3. For sectioned forms: never reopen completed sections
+      4. Submit when form is truly complete
+
+      What should I do next?
+      - OPEN_SECTION: ONLY for sectioned forms with unfilled sections NOT in completedSections
+      - SUBMIT: if all fields/sections are completed
     `;
 
     try {
+      // Get AI decision and parse the JSON response
       const response = await generateContent(prompt);
       const responseText = response.text || '';
-    
+      
       const start = responseText.indexOf('{');
       const end = responseText.lastIndexOf('}') + 1;
       const jsonText = responseText.substring(start, end);
@@ -95,11 +88,13 @@ export class DecisionModule {
       const action = JSON.parse(jsonText);
       return action;
     } catch (error) {
+      // Handle rate limiting with exponential backoff
       if ((error as any).status === 429) {
         console.log("Rate limited, waiting 15 seconds...");
         await new Promise(resolve => setTimeout(resolve, 15000));
         return this.decide(currentState, completedSections, completedFields);
       }
+      
       console.error("AI decision failed:", error);
       return {
         type: 'RECOVER',

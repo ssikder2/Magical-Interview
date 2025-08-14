@@ -3,17 +3,20 @@ import { CreateJobRequest } from '../../types';
 
 const router = Router();
 
-// Create a new form-filling job
+// Endpoint to create a new form-filling job
+// Accepts URL, form data, and optional name to start automated form filling
 router.post('/fill-form', (req: Request, res: Response) => {
   try {
     const { url, formData, name }: CreateJobRequest = req.body;
 
+    // Validate required fields
     if (!url || !formData) {
       return res.status(400).json({
         error: 'Missing required fields: url and formData are required'
       });
     }
 
+    // Create new job using the job service
     const job = req.app.locals.jobService.CreateJob({ url, formData, name });
 
     res.status(201).json({

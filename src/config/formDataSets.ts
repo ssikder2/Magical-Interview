@@ -1,10 +1,13 @@
-
+// Interface for form data sets used in automated testing and scheduling
+// Defines the structure for predefined form data that can be used by the scheduler
 export interface FormDataSet {
   name: string;
   url: string;
   formData: Record<string, string>;
 }
 
+// Predefined form data sets for automated form filling
+// These rotate through the scheduler to provide variety in testing
 export const FORM_DATA_SETS: FormDataSet[] = [
   {
     name: 'Medical Form - Set 1',
@@ -16,8 +19,8 @@ export const FORM_DATA_SETS: FormDataSet[] = [
       medicalId: '12345',
       gender: 'Male',
       bloodType: 'O+',
-      allergies: '',
-      currentMedications: '',
+      allergies: 'None',
+      medications: 'None',
       emergencyContact: 'Jane Doe',
       emergencyPhone: '555-1234'
     }
@@ -33,7 +36,7 @@ export const FORM_DATA_SETS: FormDataSet[] = [
       gender: 'Female',
       bloodType: 'A+',
       allergies: 'Peanuts',
-      currentMedications: 'Vitamin D',
+      medications: 'Vitamin D',
       emergencyContact: 'Mike Smith',
       emergencyPhone: '555-5678'
     }
@@ -49,7 +52,7 @@ export const FORM_DATA_SETS: FormDataSet[] = [
       gender: 'Male',
       bloodType: 'B-',
       allergies: 'Shellfish',
-      currentMedications: 'None',
+      medications: 'None',
       emergencyContact: 'Lisa Johnson',
       emergencyPhone: '555-9999'
     }
