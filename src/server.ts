@@ -1,10 +1,10 @@
 import cors from 'cors';
 import express from "express";
-import formRoutes from './routes/formRoutes';
-import { AgentService } from './services/agentService';
-import { JobProcessor } from './services/jobProcessor';
-import { JobService } from './services/jobService';
-import { SchedulerService } from './services/schedulerService';
+import formRoutes from './api/routes/formRoutes';
+import { AgentService } from './core/services/AgentService';
+import { JobProcessor } from './core/services/JobProcessor';
+import { JobService } from './core/services/JobService';
+import { SchedulerService } from './core/services/SchedulerService';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

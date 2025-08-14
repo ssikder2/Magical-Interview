@@ -1,4 +1,4 @@
-import { CreateJobRequest, Job, JobStatus } from '../types/api';
+import { CreateJobRequest, Job, JobStatus } from '../../types';
 
 export class JobService {
   private jobs: Map<string, Job> = new Map();

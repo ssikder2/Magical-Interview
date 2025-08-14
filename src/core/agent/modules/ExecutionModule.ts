@@ -1,17 +1,11 @@
 import { Page } from "playwright";
-import { generateContent } from "../../_internal/setup";
-import { Action, SubAction } from "../types";
+import { Action, ExecutionPlan, SubAction } from "../../../types";
+import { generateContent } from "../../../utils/ai";
 
 export class ExecutionModule {
   constructor(private page: Page) {}
 
   async executeSingleAction(action: Action | SubAction): Promise<void> {
-    const pageContent = await this.page.evaluate(() => document.body.innerHTML);
-    if (pageContent.includes("Form submitted successfully!")) {
-      console.log("Form already submitted successfully!");
-      return;
-    }
-    
     const executionPrompt = `
       CRITICAL: Return ONLY raw JSON, no formatting, no markdown, no code blocks.
       The response must start with { and end with }.
@@ -19,7 +13,7 @@ export class ExecutionModule {
       You are an AI that executes actions on web forms.
       
       Action to execute: ${JSON.stringify(action)}
-      Current page HTML: ${pageContent}
+      Current page HTML: ${await this.page.evaluate(() => document.body.innerHTML)}
       
       Return ONLY valid JSON with the exact Playwright command to execute:
       {
@@ -37,7 +31,7 @@ export class ExecutionModule {
     const end = responseText.lastIndexOf('}') + 1;
     const jsonText = responseText.substring(start, end);
     
-    const execution = JSON.parse(jsonText);
+    const execution: ExecutionPlan = JSON.parse(jsonText);
 
     console.log(`Executing: ${execution.command} on ${execution.selector}`);
 

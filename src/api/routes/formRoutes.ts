@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { CreateJobRequest } from '../types/api';
+import { CreateJobRequest } from '../../types';
 
 const router = Router();
 

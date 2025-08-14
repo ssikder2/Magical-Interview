@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
-import { MedicalFormAgent } from '../agent/medicalFormAgent';
-import { Job, JobStatus } from '../types/api';
-import { JobService } from './jobService';
+import { Job, JobStatus } from '../../types';
+import { MedicalFormAgent } from '../agent/MedicalFormAgent';
+import { JobService } from './JobService';
 
 export class AgentService {
   constructor(private jobService: JobService) {}
@@ -14,8 +14,26 @@ export class AgentService {
       const browser = await chromium.launch({ headless: false });
       const page = await browser.newPage();
 
-      console.log(`Opening ${job.url}`);
-      await page.goto(job.url);
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`Opening ${job.url} (attempt ${retryCount + 1})`);
+          await page.goto(job.url, { 
+            waitUntil: 'networkidle',
+            timeout: 30000 
+          });
+          break;
+        } catch (error) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            throw new Error(`Failed to load page after ${maxRetries} attempts: ${(error as any).message}`);
+          }
+          console.log(`Page load failed, retrying in 5 seconds... (${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+      }
 
       console.log(`Agent starting for job ${job.id}`);
       const agent = new MedicalFormAgent(page, job.formData);

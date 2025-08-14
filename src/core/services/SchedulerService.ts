@@ -1,6 +1,6 @@
-import { FORM_DATA_SETS } from '../config/formDataSets';
-import { CreateJobRequest } from '../types/api';
-import { JobService } from './jobService';
+import { FORM_DATA_SETS } from '../../config/formDataSets';
+import { CreateJobRequest } from '../../types';
+import { JobService } from './JobService';
 
 export class SchedulerService {
   private schedulingInterval: NodeJS.Timeout | null = null;

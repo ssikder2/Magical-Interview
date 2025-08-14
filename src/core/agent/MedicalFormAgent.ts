@@ -1,9 +1,8 @@
 import { Page } from "playwright";
-import { MEDICAL_FORM_DATA } from "./constants/formData";
-import { DecisionModule } from "./modules/decision";
-import { ExecutionModule } from "./modules/execution";
-import { PerceptionModule } from "./modules/perception";
-import { Action, FormData } from "./types";
+import { Action, FormData } from "../../types";
+import { DecisionModule } from "./modules/DecisionModule";
+import { ExecutionModule } from "./modules/ExecutionModule";
+import { PerceptionModule } from "./modules/PerceptionModule";
 
 export class MedicalFormAgent {
   private page: Page;
@@ -15,9 +14,9 @@ export class MedicalFormAgent {
   private decision: DecisionModule;
   private execution: ExecutionModule;
 
-  constructor(page: Page, formData?: FormData) {
+  constructor(page: Page, formData: FormData) {
     this.page = page;
-    this.formData = MEDICAL_FORM_DATA;
+    this.formData = formData;
     
     this.perception = new PerceptionModule(page);
     this.decision = new DecisionModule(this.formData);

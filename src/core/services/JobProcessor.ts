@@ -1,6 +1,6 @@
-import { JobStatus } from '../types/api';
-import { AgentService } from './agentService';
-import { JobService } from './jobService';
+import { JobStatus } from '../../types';
+import { AgentService } from './AgentService';
+import { JobService } from './JobService';
 
 export class JobProcessor {
   private isProcessing = false;

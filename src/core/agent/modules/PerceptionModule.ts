@@ -1,5 +1,5 @@
 import { Page } from "playwright";
-import { PageState } from "../types";
+import { PageState } from "../../../types";
 
 export class PerceptionModule {
   constructor(private page: Page) {}
