@@ -1,5 +1,116 @@
 # Magical LLM Challenge
 
+## What I Built
+
+I've created a **fully autonomous AI agent** that can intelligently fill out any web form using an agentic loop approach. The agent perceives the form structure, makes strategic decisions using AI, and executes actions efficiently.
+
+### Key Features
+
+- **Intelligent Form Analysis**: Uses AI to understand form structure (sections, fields, types)
+- **Strategic Decision Making**: AI decides when to explore sections vs. fill fields vs. submit
+- **Efficient Execution**: Fills multiple fields in batches to minimize API calls
+- **Robust Agentic Loop**: Perceive → Decide → Act → Repeat until completion
+- **Job Management**: REST API endpoints for creating, monitoring, and scheduling form-filling jobs
+- **Automated Scheduling**: Runs forms every 5 minutes with rotating test data sets
+
+### Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Perception     │    │   Decision      │    │   Execution     │
+│     Module      │───▶│     Module      │───▶│     Module      │
+│                 │    │                 │    │                 │
+│ • Analyzes DOM  │    │ • AI-powered    │    │ • Playwright    │
+│ • Finds fields  │    │ • Strategic     │    │ • Clicks, fills │
+│ • Tracks state  │    │ • Phase-based   │    │ • Submits forms │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### How It Works
+
+1. **Perception**: Scans the page to find form sections, fields, and current state
+2. **Decision**: AI analyzes the situation and chooses the next strategic phase:
+   - `EXPLORE_SECTIONS`: Open a new section to discover fields
+   - `FILL_VISIBLE_FIELDS`: Fill all currently visible fields efficiently
+   - `SUBMIT`: Submit when form is complete
+3. **Execution**: Uses Playwright to perform actions (click, fill, submit)
+4. **Repeat**: Continues until form is fully completed
+
+## How to Test
+
+### 1. Start the Services
+```bash
+npm run dev
+```
+
+### 2. Watch the Magic Happen
+- The scheduler automatically creates form-filling jobs every 5 minutes
+- The agent will automatically open your browser
+- Navigate to the form and start filling it out
+- Watch it intelligently explore sections and fill fields
+- See it submit the form when complete
+
+### 3. Manual Job Creation (Optional)
+If you want to test with custom data or specific scenarios:
+```bash
+curl -X POST http://localhost:3000/api/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://magical-medical-form.netlify.app/",
+    "formData": {
+      "firstName": "Jane",
+      "lastName": "Smith", 
+      "dateOfBirth": "1985-05-15",
+      "medicalId": "67890",
+      "gender": "Female",
+      "bloodType": "A+",
+      "allergies": "Peanuts",
+      "medications": "Vitamin D",
+      "emergencyContact": "Mike Smith",
+      "emergencyPhone": "555-5678"
+    }
+  }'
+```
+
+### 4. Monitor Job Progress (Optional)
+```bash
+curl http://localhost:3000/api/jobs
+```
+
+### 5. Check Job Results (Optional)
+```bash
+curl http://localhost:3000/api/jobs/[JOB_ID]
+```
+
+**Note**: Jobs are created automatically by the scheduler service every 5 minutes, but you can also manually create jobs via the API for testing specific scenarios.
+
+## What Makes This Special
+
+- **Form-Agnostic**: Works with any web form, not just the medical form
+- **AI-Powered**: Makes intelligent decisions about form-filling strategy
+- **Production-Ready**: Includes error handling, rate limiting, and job management
+- **Scalable**: Can handle multiple concurrent form-filling jobs
+- **Observable**: Full logging and job status tracking
+
+## Project Structure
+
+```
+src/
+├── core/agent/           # Main AI agent implementation
+│   ├── MedicalFormAgent.ts    # Orchestrates the agentic loop
+│   └── modules/               # Specialized modules
+│       ├── PerceptionModule.ts # Analyzes form state
+│       ├── DecisionModule.ts   # AI-powered decision making
+│       └── ExecutionModule.ts  # Executes Playwright actions
+├── services/              # Background services
+│   ├── JobProcessor.ts    # Processes pending jobs
+│   └── SchedulerService.ts # Creates scheduled jobs
+└── routes/                # REST API endpoints
+    └── formRoutes.ts      # Job management API
+```
+
+---
+
 ## Overview
 
 Welcome! We're excited to see you're interested in joining our team.
